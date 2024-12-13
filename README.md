@@ -74,6 +74,19 @@ interface Column {
 
 The library includes a set of services for interacting with the THF API.
 
+### API Configuration
+
+The API services can be configured through the `API_CONFIG` object:
+
+```typescript
+import { ApiClient } from 'thf-labs';
+
+const apiClient = ApiClient.getInstance();
+
+// Set API key
+apiClient.setApiKey('your-api-key');
+```
+
 ### DealerGammaService
 
 Service for fetching and managing dealer gamma data.
@@ -86,9 +99,6 @@ import { DealerGammaService, THFtable } from 'thf-labs';
 const GammaDataComponent = () => {
   const [tableData, setTableData] = useState([]);
   const dealerGammaService = DealerGammaService.getInstance();
-
-  // Optional: Set API key if required
-  dealerGammaService.setApiKey('your-api-key');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -113,19 +123,6 @@ const GammaDataComponent = () => {
 
   return <THFtable data={tableData} columns={columns} />;
 };
-```
-
-### API Configuration
-
-The API services can be configured through the `API_CONFIG` object:
-
-```typescript
-import { ApiClient } from 'thf-labs';
-
-const apiClient = ApiClient.getInstance();
-
-// Set API key
-apiClient.setApiKey('your-api-key');
 ```
 
 ## Styling

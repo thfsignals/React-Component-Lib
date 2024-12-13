@@ -20,27 +20,33 @@ export default [
       {
         file: packageJson.main,
         format: "cjs",
-        sourcemap: true,
+        sourcemap: true
       },
       {
         file: packageJson.module,
         format: "esm",
-        sourcemap: true,
+        sourcemap: true
       },
     ],
+    external: ['react', 'react-dom'],
     plugins: [
       peerDepsExternal(),
-      commonjs(),
-      postcss(),
-      terser(),
-      image(),
+      nodeResolve({
+        extensions: ['.js', '.ts', '.jsx', '.tsx', '.json'],
+        preferBuiltins: true
+      }),
+      commonjs({
+        include: /node_modules/,
+        requireReturnsDefault: 'auto',
+      }),
       typescript({
         tsconfig: "./tsconfig.json",
-        useTsconfigDeclarationDir: false
+        useTsconfigDeclarationDir: false,
+        clean: true
       }),
-      nodeResolve({
-        extensions: ['.js', '.ts', '.jsx', '.tsx', '.json']
-      })
+      postcss(),
+      terser(),
+      image()
     ],
   },
   {

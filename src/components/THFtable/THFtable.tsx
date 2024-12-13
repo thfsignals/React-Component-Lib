@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import * as React from "react";
+import { useState, useMemo } from "react";
 import "./THFtable.css";
 
 // Column configuration for table headers
@@ -17,37 +18,44 @@ export interface TableProps {
 }
 
 const THFtable: React.FC<TableProps> = ({ 
-  data, 
+  data = [], 
   columns, 
   pageSize = 10,
   title 
 }) => {
   // State for pagination and sorting
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  //const [currentPage, setCurrentPage] = useState(1);
+  //const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
   // Sort data based on current sort configuration
-  const sortedData = React.useMemo(() => {
-    if (!sortConfig) return data;
-
+  /*
+  const sortedData = useMemo(() => {
+    if (!sortConfig || !data) return data || [];
     return [...data].sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+      
+      if (aValue === undefined || bValue === undefined) return 0;
+      
+      if (aValue < bValue) {
         return sortConfig.direction === 'asc' ? -1 : 1;
       }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
+      if (aValue > bValue) {
         return sortConfig.direction === 'asc' ? 1 : -1;
       }
       return 0;
     });
-  }, [data, sortConfig]);
+  }, [data, sortConfig?.key, sortConfig?.direction]);
+  */
 
   // Calculate pagination values
-  const totalPages = Math.ceil(data.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedData = sortedData.slice(startIndex, startIndex + pageSize);
+  //const totalPages = Math.ceil((sortedData?.length || 0) / pageSize);
+  //const startIndex = (currentPage - 1) * pageSize;
+  const paginatedData = data //sortedData?.slice(startIndex, startIndex + pageSize) || [];
 
   // Handle column sort clicks
   const handleSort = (key: string) => {
+    /*
     setSortConfig((current) => {
       if (!current || current.key !== key) {
         return { key, direction: 'asc' };
@@ -57,6 +65,7 @@ const THFtable: React.FC<TableProps> = ({
       }
       return null;
     });
+    */
   };
 
   return (
@@ -72,11 +81,11 @@ const THFtable: React.FC<TableProps> = ({
                 className={column.sortable ? 'sortable' : ''}
               >
                 {column.header}
-                {sortConfig?.key === column.key && (
+                {/* sortConfig?.key === column.key && (
                   <span className="sort-indicator">
                     {sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}
                   </span>
-                )}
+                ) */}
               </th>
             ))}
           </tr>
@@ -94,6 +103,7 @@ const THFtable: React.FC<TableProps> = ({
         </tbody>
       </table>
       
+      {/*}
       {totalPages > 1 && (
         <div className="thf-table-pagination">
           <button 
@@ -115,6 +125,7 @@ const THFtable: React.FC<TableProps> = ({
           </button>
         </div>
       )}
+      */}
     </div>
   );
 };
