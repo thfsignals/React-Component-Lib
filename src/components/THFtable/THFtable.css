@@ -1,0 +1,84 @@
+button {
+    font-size: 60px;
+  }
+
+.thf-table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.thf-table-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.thf-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.thf-table th,
+.thf-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.thf-table th {
+  background-color: #f7fafc;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.thf-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.thf-table th.sortable:hover {
+  background-color: #edf2f7;
+}
+
+.thf-table tbody tr:hover {
+  background-color: #f7fafc;
+}
+
+.thf-table-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.thf-pagination-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  background-color: #fff;
+  color: #4a5568;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.thf-pagination-button:hover:not(:disabled) {
+  background-color: #f7fafc;
+}
+
+.thf-pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.thf-pagination-info {
+  color: #4a5568;
+}
+
+.sort-indicator {
+  margin-left: 0.25rem;
+  display: inline-block;
+}
