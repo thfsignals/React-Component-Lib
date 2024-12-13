@@ -1,9 +1,17 @@
-import resolve from "@rollup/plugin-node-resolve";
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from "@rollup/plugin-commonjs";
-import typescript from "@rollup/plugin-typescript";
+import typescript from "rollup-plugin-typescript2";
 import dts from "rollup-plugin-dts";
 
-const packageJson = require("./package.json");
+// To handle css files
+import postcss from "rollup-plugin-postcss";
+
+import terser from "@rollup/plugin-terser";
+import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import image from '@rollup/plugin-image';
+
+
+import packageJson from './package.json' assert { type: 'json' };
 
 export default [
   {
@@ -21,14 +29,25 @@ export default [
       },
     ],
     plugins: [
-      resolve(),
+      peerDepsExternal(),
       commonjs(),
-      typescript({ tsconfig: "./tsconfig.json" }),
+      postcss(),
+      terser(),
+      image(),
+      typescript({
+        tsconfig: "./tsconfig.json",
+        useTsconfigDeclarationDir: false
+      }),
+      nodeResolve({
+        extensions: ['.js', '.ts', '.jsx', '.tsx', '.json']
+      })
     ],
   },
   {
-    input: "dist/esm/types/index.d.ts",
+    input: "dist/esm/index.d.ts",
     output: [{ file: "dist/index.d.ts", format: "esm" }],
     plugins: [dts()],
+
+    external: [/\.css$/], // telling rollup anything that is .css aren't part of type exports 
   },
-];
+]
