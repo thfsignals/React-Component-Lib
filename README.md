@@ -8,19 +8,78 @@ A React component library designed for Texas High Frequency API routing services
 npm install thf-labs
 ```
 
+## API Configuration
+
+⚠️ **Important**: An API key is required to use any of the THF Labs services. Components can be used independently without an API key.
+
+Before using any services (like DealerGammaService), configure the ApiClient with your API key:
+
+```typescript
+import { ApiClient } from 'thf-labs';
+
+// Initialize the API client with your key
+const apiClient = ApiClient.getInstance();
+
+// Best practice: Set this in your app's entry point (e.g., App.js or index.js)
+// Make sure to use environment variables for the API key
+apiClient.setApiKey(process.env.REACT_APP_THF_API_KEY);
+```
+
+### Environment Variables
+
+For security, we recommend storing your API key in environment variables:
+
+1. Create a `.env` file in your project root:
+```
+REACT_APP_THF_API_KEY=your-api-key
+```
+
+2. Add `.env` to your `.gitignore` file:
+```
+# .gitignore
+.env
+.env.local
+```
+
+3. Create a `.env.example` file:
+```
+REACT_APP_THF_API_KEY=your-api-key-here
+```
+
 ## Components
 
 ### THFtable
 
-A flexible and feature-rich table component that supports pagination, sorting, and customizable styling.
+A flexible and feature-rich table component that supports sorting, pagination, and customizable styling.
 
 #### Features
 
+- Column sorting (ascending/descending)
 - Pagination with customizable page size
-- Column sorting
 - Responsive design with horizontal scrolling
-- Customizable styling
+- Error state handling
+- Loading state display
 - TypeScript support
+- Customizable styling
+
+#### Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| data | array | Yes | - | Array of objects to display in the table |
+| columns | Column[] | Yes | - | Array of column definitions |
+| pageSize | number | No | 10 | Number of rows per page |
+| title | string | No | - | Optional table title |
+
+#### Column Definition
+
+```typescript
+interface Column {
+  key: string;          // Unique identifier for the column
+  header: string;       // Display text for column header
+  sortable?: boolean;   // Enable sorting for this column
+}
+```
 
 #### Basic Usage
 
@@ -51,63 +110,43 @@ const MyComponent = () => {
 };
 ```
 
-#### Props
-
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| data | array | Yes | - | Array of objects to display in the table |
-| columns | Column[] | Yes | - | Array of column definitions |
-| pageSize | number | No | 10 | Number of rows per page |
-| title | string | No | - | Table title |
-
-#### Column Definition
-
-```typescript
-interface Column {
-  key: string;          // Key to access data
-  header: string;       // Column header text
-  sortable?: boolean;   // Whether column is sortable
-}
-```
-
-## API Services
-
-The library includes a set of services for interacting with the THF API.
-
-### API Configuration
-
-The API services can be configured through the `API_CONFIG` object:
-
-```typescript
-import { ApiClient } from 'thf-labs';
-
-const apiClient = ApiClient.getInstance();
-
-// Set API key
-apiClient.setApiKey('your-api-key');
-```
+## Services
 
 ### DealerGammaService
 
-Service for fetching and managing dealer gamma data.
+A singleton service for fetching and transforming dealer gamma data. **Requires API key configuration** (see [API Configuration](#api-configuration) section above).
 
-#### Usage with THFtable
+#### Features
+
+- Singleton pattern for consistent state management
+- Built-in data transformation for THFtable compatibility
+- TypeScript support with proper typing
+- Integrated with ApiClient for API communication
+
+#### Usage
 
 ```typescript
 import { DealerGammaService, THFtable } from 'thf-labs';
 
 const GammaDataComponent = () => {
   const [tableData, setTableData] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const dealerGammaService = DealerGammaService.getInstance();
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const response = await dealerGammaService.getGammaData('SPY');
         const formattedData = dealerGammaService.transformGammaDataForTable(response);
         setTableData(formattedData);
+        setError(null);
       } catch (error) {
-        console.error('Failed to fetch gamma data:', error);
+        setError(error.message || 'Failed to fetch gamma data');
+        setTableData([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -121,52 +160,63 @@ const GammaDataComponent = () => {
     { key: 'gamma', header: 'Gamma', sortable: true }
   ];
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
   return <THFtable data={tableData} columns={columns} />;
 };
 ```
 
-## Styling
+#### API Methods
 
-The THFtable component comes with default styling that can be customized through CSS classes:
-
-```css
-/* Example custom styling */
-.thf-table {
-  /* Your custom table styles */
-}
-
-.thf-table th {
-  /* Your custom header styles */
-}
-
-.thf-table td {
-  /* Your custom cell styles */
-}
-
-.thf-pagination-button {
-  /* Your custom pagination button styles */
-}
-```
-
-## Error Handling
-
-The API services include built-in error handling:
+##### `getInstance()`
+Returns the singleton instance of DealerGammaService.
 
 ```typescript
-try {
-  const data = await dealerGammaService.getGammaData('SPY');
-  // Handle success
-} catch (error) {
-  if (error instanceof ApiError) {
-    // Handle API-specific error
-    console.error(`API Error: ${error.status} - ${error.statusText}`);
-  } else {
-    // Handle other errors
-    console.error('An unexpected error occurred:', error);
-  }
-}
+const service = DealerGammaService.getInstance();
 ```
+
+##### `getGammaData(symbol: string)`
+Fetches dealer gamma data for a specific symbol.
+
+```typescript
+const data = await service.getGammaData('SPY');
+```
+
+##### `transformGammaDataForTable(data: DealerGammaResponse)`
+Transforms the API response into a format compatible with THFtable.
+
+```typescript
+const tableData = service.transformGammaDataForTable(data);
+```
+
+## CSS Customization
+
+The library provides default styling that can be customized using CSS classes:
+
+### THFtable Classes
+
+- `.thf-table-container` - Main table container
+- `.thf-table` - Table element
+- `.thf-table-title` - Table title
+- `.thf-table th.sortable` - Sortable column headers
+- `.thf-table th.sorted-asc` - Ascending sorted column
+- `.thf-table th.sorted-desc` - Descending sorted column
+- `.sort-indicator` - Sort direction indicator
+- `.loading-container` - Loading state container
+- `.loading-spinner` - Loading spinner animation
+- `.error-container` - Error state container
+- `.error-message` - Error message styling
+
+## TypeScript Support
+
+This library is written in TypeScript and includes type definitions. No additional @types packages are required.
 
 ## License
 
-ISC License - see LICENSE file for details.
+ISC
